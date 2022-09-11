@@ -1,0 +1,261 @@
+%!TEX program = xelatex
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{authblk}
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{amsmath, amsfonts, amsthm, amssymb, graphicx, xcolor, hyperref, mathrsfs}
+\lstset{
+    basicstyle          =   \sffamily,          % 基本代码风格
+    keywordstyle        =   \bfseries,          % 关键字风格
+    commentstyle        =   \rmfamily\itshape,  % 注释的风格，斜体
+    stringstyle         =   \ttfamily,  % 字符串风格
+    flexiblecolumns,                % 别问为什么，加上这个
+    numbers             =   left,   % 行号的位置在左边
+    showspaces          =   false,  % 是否显示空格，显示了有点乱，所以不现实了
+    numberstyle         =   \zihao{-5}\ttfamily,    % 行号的样式，小五号，tt等宽字体
+    showstringspaces    =   false,
+    captionpos          =   t,      % 这段代码的名字所呈现的位置，t指的是top上面
+    frame               =   lrtb,   % 显示边框
+    breaklines%自动换行
+}
+
+\title{计算物理作业8} %文章标题
+\author[a]{王一杰} %作者的名称
+\affil[a]{中国科学技术大学}
+\date{\today}%日期
+\usepackage [a4paper, left=25mm,right=25mm,top=20mm,bottom=20mm]{geometry} %设置页面的环境，a4纸张大小，左右上下边距信息
+
+\begin{document}
+\maketitle
+%添加这一句才能够显示标题等信息
+\tableofcontents
+
+\section{Problem 1}
+\subsection{程序设定}
+\textbf{问题描述：}
+
+一个小球质量$m$，以初速度$V_0$，与水平方向夹角$\theta$，从坐标原点开始做抛物运动。它在空气中的阻力可以近似用$-b\overrightarrow{v}$来 表示，$\overrightarrow{v}$为速度矢量。使用mathematica求解运动轨迹问题。
+
+\textbf{程序设定：}
+
+\quad 小球质量$m=0.14kg$,
+
+\quad 重力加速度$g=9.8m/s^2$,
+
+\quad 初速率$V_0=45m/s$，
+
+\quad 出射角$\theta=\frac{\pi}{3}$.
+
+\subsection{程序实现}
+
+程序实现如下：
+
+\begin{lstlisting}[language=Mathematica]
+Clear["Global`*"]
+sol = DSolve[{x''[t] == -(b/m)*x'[t], y''[t] == -(b/m)*y'[t] - g, 
+     x[0] == 0, y[0] == 0, x'[0] == v0*Cos[\[Theta]], 
+     y'[0] == v0*Sin[\[Theta]]}, {x[t], y[t]}, t] // ExpandAll;
+(*运动方程求解*)
+x[t_] = (x[t] /. Flatten[sol][[1]]);
+y[t_] = (y[t] /. Flatten[sol][[2]]);
+t[t_] = InverseFunction[x][t] // Simplify;
+(*反函数，利用x表示t*)
+yx[x_] = y[t[x]]
+(*t(x)带入y(t)，获得表达式y(x)*)
+
+yyx[x_] = 
+ yx[x] //. {b -> 0.033, m -> 0.14, v0 -> 45, \[Theta] -> \[Pi]/3, 
+   g -> 9.8}
+(*赋值*)
+yy0[x_] = 
+  Tan[\[Theta]]*x - (1/2)*(g/(v0^2*Cos[\[Theta]]^2))*x^2 //. {g -> 
+     9.8, v0 -> 45, \[Theta] -> \[Pi]/3};
+(*无阻力轨迹方程*)
+Plot[{yyx[x], yy0[x]}, {x, 0, 200}, 
+ PlotStyle -> Thickness[0.01], PlotRange -> {{0, 200}, {0, 100}}, 
+ Frame -> True, FrameLabel -> {Style["x/m", 18], Style["y/m", 18]}, 
+ FrameStyle -> Thickness[0.003], 
+ PlotLegends -> {Style["有阻力", 18], Style["无阻力", 18]}]
+(*绘图*)
+\end{lstlisting}
+
+\subsection{运行结果}
+
+运行得到的代数函数如下：
+
+\begin{equation}
+	y(x)=-\frac{g m^2 \log \left(\frac{m \text{v0} \cos (\theta )}{m \text{v0} \cos (\theta )-b x}\right)}{b^2}+\frac{g m^2}{b^2}-\frac{g m \sec (\theta ) (m \text{v0} \cos (\theta )-b x)}{b^2 \text{v0}}+\frac{m \text{v0} \sin (\theta )}{b}-\frac{\tan (\theta ) (m \text{v0} \cos (\theta )-b x)}{b}.
+\end{equation}
+
+代入预设参数，得到结果（并与无阻力情况对比）如图1所示：
+
+\begin{figure}[h]
+ \center{\includegraphics[width=10cm]{hw81.png}}
+ \caption{Problem 1 运行结果}
+\end{figure}
+
+\section{Problem 2}
+\subsection{程序设定}
+
+\textbf{问题描述：}
+
+考察一维量子力学问题，质量为$m$的一个粒子束缚在势阱$V(x)$中运动，$V(x)$的形式如下:
+
+\begin{equation}
+	\begin{aligned}
+		V(x)
+			=\left\{
+		\begin{array}{lr}
+			-V_0，& |x|<a\\
+			0，& |x|\le a
+		\end{array},
+	\right.
+	\end{aligned}
+\end{equation}
+给出定态情形下本征波函数$\psi(x)$与本征能量$E$，画出前三个能级本征波函数。
+
+\textbf{程序设定：}
+
+\quad 使用自然单位制,
+
+\quad $m=1GeV$,
+\quad $V_0=1GeV$,
+\quad $a=3GeV^{-1}$.
+
+\subsection{程序实现}
+
+程序实现如下：
+
+\begin{lstlisting}[language=Mathematica]
+Clear["Global`*"]
+
+V0 = 1;
+m = 1;
+a = 3;
+(*参数赋值*)
+
+q[E0_] = Sqrt[2 m (V0 + E0)];
+k[E0_] = Sqrt[-2 m*E0];
+B0[E0_] = Exp[k[E0]*a]*Cos[q[E0]*a];
+D0[E0_] = -Exp[k[E0]*a]*Sin[q[E0]*a];
+(*已知条件带入*)
+
+Uevenc[E0_, x_] = Cos[q[E0]*x];
+Uevenp[E0_, x_] = B0[E0]*Exp[-k[E0]*x];
+Uevenn[E0_, x_] = B0[E0]*Exp[k[E0]*x];
+Uoddc[E0_, x_] = Sin[q[E0]*x];
+Uoddp[E0_, x_] = -D0[E0]*Exp[-k[E0]*x];
+Uoddn[E0_, x_] = D0[E0]*Exp[k[E0]*x];
+(*写出通解*)
+
+soleven = 
+  Flatten[FindRoot[(D[Uevenc[E0, x], x] /. 
+          x -> a) == (D[Uevenp[E0, x], x] /. x -> a) // 
+       Simplify, {E0, #}] & /@ (Range[1, 10, 1]*(-10^-1))];
+solodd = Flatten[
+   FindRoot[(D[Uoddc[E0, x], x] /. x -> a) == (D[Uoddp[E0, x], x] /. 
+          x -> a) // Simplify, {E0, #}] & /@ (Range[1, 10, 
+       1]*(-10^-1))];
+(*带入边界条件，求解超越方程*)
+
+E3 = E0 /. soleven[[1]];
+E2 = E0 /. solodd[[3]];
+E1 = E0 /. soleven[[7]];
+(*本征值能量获取*)
+
+U1[x_] = Piecewise[{{Uevenn[E1, x], 
+     x <= -a}, {Uevenc[E1, x], -a < x <= a}, {Uevenp[E1, x], 
+     x > a}}];
+U2[x_] = Piecewise[{{Uoddn[E2, x], 
+     x <= -a}, {Uoddc[E2, x], -a < x <= a}, {Uoddp[E2, x], x > a}}];
+U3[x_] = Piecewise[{{Uevenn[E3, x], 
+     x <= -a}, {Uevenc[E3, x], -a < x <= a}, {Uevenp[E3, x], 
+     x > a}}];
+(*带入参数，获得未归一化波函数*)
+
+A1 = Integrate[U1[x]*U1[x], {x, -Infinity, +Infinity}];
+A2 = Integrate[U2[x]*U2[x], {x, -Infinity, +Infinity}];
+A3 = Integrate[U3[x]*U3[x], {x, -Infinity, +Infinity}];
+(*计算归一化因子*)
+
+U10[x_] = PiecewiseExpand[U1[x]/(Sqrt[A1])]
+(*归一化*)
+Plot[U10[x], {x, -10, 10}, PlotStyle -> Thickness[0.01], 
+ Frame -> True, FrameLabel -> {Style["x", 18], Style["\[Psi]", 18]}, 
+ FrameStyle -> Thickness[0.003], 
+ PlotLegends -> Style[ToString[E1] "=E1", 18]]
+(*绘图*)
+U20[x_] = PiecewiseExpand[U2[x]/(Sqrt[A2])]
+(*归一化*)
+Plot[U20[x], {x, -10, 10}, PlotStyle -> Thickness[0.01], 
+ Frame -> True, FrameLabel -> {Style["x", 18], Style["\[Psi]", 18]}, 
+ FrameStyle -> Thickness[0.003], 
+ PlotLegends -> Style[ToString[E2] "=E2", 18]]
+(*绘图*)
+U30[x_] = PiecewiseExpand[U3[x]/(Sqrt[A3])]
+(*归一化*)
+Plot[U30[x], {x, -10, 10}, PlotStyle -> Thickness[0.01], 
+ Frame -> True, FrameLabel -> {Style["x", 18], Style["\[Psi]", 18]}, 
+ FrameStyle -> Thickness[0.003], 
+ PlotLegends -> Style[ToString[E3] "=E3", 18]]
+(*绘图*)
+\end{lstlisting}
+
+\subsection{运行结果}
+
+给出的3个本征态分别如下：
+
+\begin{equation}
+\begin{aligned}
+		E_1=-0.910757GeV,\quad
+		\psi(x)
+			=\left\{
+		\begin{array}{lr}
+		8.85551 e^{1.34963 x}, & x\le -3\\
+		 0.517023 \cos (0.422476 x)，& -3<x\le 3\\
+			 8.85551 e^{-1.34963 x}，& x>3
+		\end{array}.
+	\right.
+	\end{aligned}
+\end{equation}
+
+\begin{equation}
+\begin{aligned}
+		E_2=-0.650311GeV,\quad
+		\psi(x)
+			=\left\{
+		\begin{array}{lr}
+		-9.19332 e^{1.14045 x}, & x\le -3\\
+		 0.507879 \sin (0.836289 x)，& -3<x\le 3\\
+			9.19332 e^{-1.14045 x}，& x>3
+		\end{array}.
+	\right.
+	\end{aligned}
+\end{equation}
+
+\begin{equation}
+\begin{aligned}
+		E_3=-0.252509GeV,\quad
+		\psi(x)
+			=\left\{
+		\begin{array}{lr}
+		-3.47226 e^{0.710646 x}, & x\le -3\\
+		0.476343 \cos (1.22269 x)，& -3<x\le 3\\
+			-3.47226 e^{-0.710646 x}，& x>3
+		\end{array}.
+	\right.
+	\end{aligned}
+\end{equation}
+
+绘出三个本征态波函数如图2所示。
+
+\begin{figure}[tbp]
+ \subfigure[本征态1]{\includegraphics[width=5cm]{hw821.eps}}
+ \subfigure[本征态2]{\includegraphics[width=5cm]{hw822.eps}}
+ \subfigure[本征态3]{\includegraphics[width=5cm]{hw823.eps}}
+ \caption{Problem 2 运行结果}
+\end{figure}
+
+
+\end{document}	

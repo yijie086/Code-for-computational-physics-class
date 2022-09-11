@@ -1,0 +1,273 @@
+%!TEX program = xelatex
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{authblk}
+\usepackage{listings}
+\usepackage{subfigure}
+\usepackage{amsmath, amsfonts, amsthm, amssymb, graphicx, xcolor, hyperref, mathrsfs}
+\lstset{
+    basicstyle          =   \sffamily,          % 基本代码风格
+    keywordstyle        =   \bfseries,          % 关键字风格
+    commentstyle        =   \rmfamily\itshape,  % 注释的风格，斜体
+    stringstyle         =   \ttfamily,  % 字符串风格
+    flexiblecolumns,                % 别问为什么，加上这个
+    numbers             =   left,   % 行号的位置在左边
+    showspaces          =   false,  % 是否显示空格，显示了有点乱，所以不现实了
+    numberstyle         =   \zihao{-5}\ttfamily,    % 行号的样式，小五号，tt等宽字体
+    showstringspaces    =   false,
+    captionpos          =   t,      % 这段代码的名字所呈现的位置，t指的是top上面
+    frame               =   lrtb,   % 显示边框
+    breaklines%自动换行
+}
+
+\title{计算物理作业7} %文章标题
+\author[a]{王一杰} %作者的名称
+\affil[a]{中国科学技术大学}
+\date{\today}%日期
+\usepackage [a4paper, left=25mm,right=25mm,top=20mm,bottom=20mm]{geometry} %设置页面的环境，a4纸张大小，左右上下边距信息
+
+\begin{document}
+\maketitle
+%添加这一句才能够显示标题等信息
+%\tableofcontents
+
+\section{Problem 1}
+\subsection{程序设定}
+\textbf{问题描述：}编写用Verlet速度算法求解三维分子运动方程的程序。
+
+\textbf{程序设定：}
+
+\quad 计算步长$h=0.001$,
+
+\quad 计算步数$n=64000$,
+
+\quad 势能构造$V=-\frac{1}{r}-\frac{1}{|\overrightarrow{r}-\overrightarrow{r_0}|},\ where\  \overrightarrow{r_0}=(1,1,1)$，即具有两个力心的平方反比吸引力。
+
+\quad 分子初始参数：
+
+\qquad 质量：$m=1$
+
+\qquad 初速度：$(v_x,v_y,v_z)=(-1,0.1,0.5)$,
+
+\qquad 初始位置：$(x,y,z)=(1,0,0.5)$,
+
+\subsection{程序实现}
+
+程序实现如下：
+
+\begin{lstlisting}[language=MATLAB]
+n=64000;					%计算步数
+h=0.001;					%计算步长
+x=zeros(n+1,3);					%位置储存单元
+v=zeros(n+1,3);					%速度储存单元
+x(1,1)=1;					%位置初始化
+x(1,2)=0;
+x(1,3)=0.5;
+v(1,1)=-1;					%速度初始化
+v(1,2)=0.1;
+v(1,3)=0.5;
+F=zeros(2,3);					%作用力存储单元
+for i=1:1:n					%演化计算
+   for j=1:1:3
+       F(1,j)=-x(i,j)/(x(i,1)^2+x(i,2)^2+x(i,3)^2)^1.5-(x(i,j)-1)/((x(i,1)-1)^2+(x(i,2)-1)^2+(x(i,3)-1)^2)^1.5;				%F_i计算
+       x(i+1,j)=x(i,j)+h*v(i,j)+0.5*F(1,j)*h^2;		%x_i+1计算
+   end
+   for j=1:1:3
+       F(2,j)=-x(i+1,j)/(x(i+1,1)^2+x(i+1,2)^2+x(i+1,3)^2)^1.5-(x(i+1,j)-1)/((x(i+1,1)-1)^2+(x(i+1,2)-1)^2+(x(i+1,3)-1)^2)^1.5;		%F_i+1计算
+       v(i+1,j)=v(i,j)+0.5*h*(F(2,j)+F(1,j));		%V_i+1计算
+   end
+end
+\end{lstlisting}
+
+\subsection{运行结果}
+
+演化结果如图1所示，计算结果期望相符，图片分别展示了两个力心的轨迹和单个力心的轨迹（即$V=-1/r$），与预期相符。可见，计算结果正确。
+
+\begin{figure}[tbp]
+ \subfigure[双力心轨迹]{\includegraphics[width=8cm]{hw712.eps}}
+ \subfigure[单力心轨迹]{\includegraphics[width=8cm]{hw713.eps}}
+ \caption{Problem 1 运行结果}
+\end{figure}
+
+\section{Problem 2}
+\subsection{程序设定}
+
+总能量固定的单原子系统的分子动力学模拟。
+
+元胞为$L_x=L_y=L_z=10$，划分为$10\times 10\times 10$的正方形网格，
+
+元胞内原子数$N=64$，
+
+原子质量$m=1$，
+
+位势为Lenard-Jones势，其中$\varepsilon=\sigma=1$，
+
+边界条件为周期性边界条件，初始位置是随机分布在正则节点上，
+
+初始速度为按$[-1，1]$随机分布。
+
+分子动力学模拟步长取为$\Delta t=0.02$，
+
+模拟$100\sim200$步后原子的速度分布和位置分布。
+
+\subsection{程序实现}
+
+\begin{lstlisting}[language=MATLAB]
+N=64;				%粒子数
+step=200;			%计算步数
+h=0.02;				%计算步长
+x=zeros(N,3);			%位置储存单元
+x1=zeros(N,3);			%位置临时储存单元
+xr=zeros(N,3);			%相对位置储存单元
+flag=0;
+E=zeros(step,1);		%Energy
+T=2;				%温度设定
+rc=4;				%截断半径
+
+l=1;
+while(l<N+1)			%位置随机生成，此处需注意一个格点只能生成一个粒子，否则会出现nan
+    flag=0;
+    x(l,:)=round(0.5+9*rand(1,3));
+    for k=1:1:l-1
+       if (x(k,1)==x(l,1))&&(x(k,2)==x(l,2))&&(x(k,3)==x(l,3))
+          flag=1;
+       end
+    end
+    if flag==1
+        l=l-1;
+    end
+    l=l+1;
+end
+v=(2*rand(N,3)-1);		%速度随机生成
+F1=zeros(64,3);			%作用力存储单元
+F2=zeros(64,3);			%作用力存储单元
+
+for i=1:1:step			%演化过程
+   for n=1:1:N
+       for r=1:1:3		%作用力的初始置0
+           F1(n,r)=0;
+           F2(n,r)=0;
+       end
+       for k=1:1:N		%最小像力约定下的相对位置计算
+           if k~=n
+               for m=1:1:3
+                    if x(n,m)-x(k,m)>5
+                        xr(k,m)=x(k,m)+10;
+                        xr(k,m)=xr(k,m)-x(n,m);
+                    elseif x(n,m)-x(k,m)<=-5
+                        xr(k,m)=x(k,m)-10;
+                        xr(k,m)=xr(k,m)-x(n,m);
+                    else
+                        xr(k,m)=x(k,m)-x(n,m);
+                    end
+               end
+               for m=1:1:3	%最小像力约定下的相互作用力计算
+                   F1(n,m)=F1(n,m)-48*xr(k,m)/(xr(k,1)^2+xr(k,2)^2+xr(k,3)^2)^7+24*xr(k,m)/(xr(k,1)^2+xr(k,2)^2+xr(k,3)^2)^4;
+                if (xr(k,1)^2+xr(k,2)^2+xr(k,3)^2)>rc^2
+                	F1(n,m)=F1(n,m)+48*xr(k,m)/(xr(k,1)^2+xr(k,2)^2+xr(k,3)^2)^7-24*xr(k,m)/(xr(k,1)^2+xr(k,2)^2+xr(k,3)^2)^4;	%截断修正
+                end
+               end
+           end
+       end
+       for m=1:1:3		%位置演化
+          x1(n,m)=mod(x(n,m)+h*v(n,m)+0.5*F1(n,m)*h^2,10); 
+       end
+   end
+   
+   for n=1:1:N
+       for k=1:1:N		%最小像力约定下的新时刻相对位置计算
+           if k~=n
+               for m=1:1:3
+                    if x1(n,m)-x1(k,m)>5
+                        xr(k,m)=x1(k,m)+10;
+                        xr(k,m)=xr(k,m)-x1(n,m);
+                    elseif x1(n,m)-x1(k,m)<=-5
+                        xr(k,m)=x1(k,m)-10;
+                        xr(k,m)=xr(k,m)-x1(n,m);
+                    else
+                        xr(k,m)=x1(k,m)-x1(n,m);
+                    end
+               end
+           
+               for m=1:1:3	%最小像力约定下的新时刻相互作用力计算
+                    F2(n,m)=F2(n,m)-48*xr(k,m)/(xr(k,1)^2+xr(k,2)^2+xr(k,3)^2)^7+24*xr(k,m)/(xr(k,1)^2+xr(k,2)^2+xr(k,3)^2)^4;
+                    if (xr(k,1)^2+xr(k,2)^2+xr(k,3)^2)>rc^2
+                        F2(n,m)=F2(n,m)+48*xr(k,m)/(xr(k,1)^2+xr(k,2)^2+xr(k,3)^2)^7-24*xr(k,m)/(xr(k,1)^2+xr(k,2)^2+xr(k,3)^2)^4;	%截断修正
+                    end
+               end
+           end
+       end
+       for m=1:1:3		%速度演化
+          v(n,m)=v(n,m)+0.5*(F1(n,m)+F2(n,m))*h; 
+       end
+   end
+   beta=0;
+   for n=1:1:N
+       for m=1:1:3
+          beta=beta+v(n,m)^2; 
+       end
+   end
+   beta=(T*(N-1)/(beta*16))^0.5;		%速度约化因子计算
+   for n=1:1:N
+       for m=1:1:3
+          v(n,m)=beta*v(n,m); 			%速度修正
+       end
+   end
+   for n=1:1:N
+      for m=1:1:3
+         x(n,m)=x1(n,m); 			%位置临时储存单元输入进位置储存单元
+      end
+   end
+   for n=1:1:N
+       for m=1:1:3
+          E(i)=E(i)+v(n,m)^2; 			%动能计算
+       end
+   end
+   E(i)=E(i)/2;
+   %---------------------------以下用于监视演化过程
+     %  figure(1)
+     %  plot3(v(:,1),v(:,2),v(:,3),'o','MarkerSize',5,'MarkerFaceColor','r')
+     %  xlim([-0.4,0.4])
+     %  ylim([-0.4,0.4])
+     %  zlim([-0.4,0.4])
+     %  grid on
+     %  figure(2)
+     %  plot3(x(:,1),x(:,2),x(:,3),'o','MarkerSize',5,'MarkerFaceColor','r')
+     %  xlim([0,10])
+     %  ylim([0,10])
+     %  zlim([0,10])
+     %  grid on
+     %  pause(0.01)
+   %---------------------------演化监视绘图结束
+end
+figure(1)					%速度相空间绘制
+plot3(v(:,1),v(:,2),v(:,3),'o','MarkerSize',5,'MarkerFaceColor','r')
+xlim([-1,1])
+ylim([-1,1])
+zlim([-1,1])
+xlabel('V_x')
+ylabel('V_y')
+zlabel('V_z')
+set(gca,'FontSize',14)
+grid on
+
+figure(2)					%位置相空间绘制
+plot3(x(:,1),x(:,2),x(:,3),'o','MarkerSize',5,'MarkerFaceColor','r')
+xlim([0,10])
+ylim([0,10])
+zlim([0,10])
+xlabel('x')
+ylabel('y')
+zlabel('z')
+set(gca,'FontSize',14)
+grid on
+\end{lstlisting}
+
+演化结果如图2所示，分别展现了速度相空间和位置相空间的原子分布，计算结果期望相符（速度满足Maxwell速度分布率，位置均匀分布）。可见，计算结果正确。
+
+\begin{figure}[tbp]
+ \subfigure[速度相空间]{\includegraphics[width=8cm]{vspace.eps}}
+ \subfigure[位置相空间]{\includegraphics[width=8cm]{xspace.eps}}
+  \caption{Problem 2 运行结果}
+\end{figure}
+\end{document}	
