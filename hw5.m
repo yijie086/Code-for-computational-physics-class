@@ -20,7 +20,7 @@ for i=1:1:round(T/dt)
     end
 end
 figure(1)
-s=surf(x,t,u)0
+s=surf(x,t,u)
 s.EdgeColor = 'none';
 xlabel('x','FontSize',18)
 ylabel('t','FontSize',18)
@@ -31,4 +31,4 @@ plot(x,u(round(T/dt+1),:),'LineWidth',2);
 xlabel('x','FontSize',18)
 ylabel('u','FontSize',18)
 set(gca,'FontSize',18)
-legend('T=40µÄÎÂ¶È')
+legend('T=40çš„æ¸©åº¦')
