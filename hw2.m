@@ -9,9 +9,9 @@ xexc=0:0.1:10;
 yexc=2000000*exp(-xexc);
 plot(xexc,yexc,'r','LineWidth',1.8);
 xlabel('x','FontSize',15)
-ylabel('Í³¼ÆÆµ´Î','FontSize',15)
+ylabel('ç»Ÿè®¡é¢‘æ¬¡','FontSize',15)
 set(gca,'FontSize',15)
-legend('Í³¼ÆÆµ´Î','Í³¼ÆÆµ´ÎÆÚÍûÖµ')
+legend('ç»Ÿè®¡é¢‘æ¬¡','ç»Ÿè®¡é¢‘æ¬¡æœŸæœ›å€¼')
 hold off;
 answer=sum(x.^(1.5))/N
 
@@ -29,8 +29,8 @@ xexc=-10:0.1:10;
 yexc=(1/pi)*(1./(xexc.^2+1))*N;
 plot(xexc,yexc,'r','LineWidth',1.8);
 xlabel('x','FontSize',15)
-ylabel('Í³¼ÆÆµ´Î','FontSize',15)
+ylabel('ç»Ÿè®¡é¢‘æ¬¡','FontSize',15)
 set(gca,'FontSize',15)
-legend('Í³¼ÆÆµ´Î','Í³¼ÆÆµ´ÎÆÚÍûÖµ')
+legend('ç»Ÿè®¡é¢‘æ¬¡','ç»Ÿè®¡é¢‘æ¬¡æœŸæœ›å€¼')
 hold off;
 answer=real(sum(pi*x.^(0.5))/N)
