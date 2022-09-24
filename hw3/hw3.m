@@ -16,8 +16,8 @@ plot(Nstep,statesmemory,Nstep,Lstatesmemory,'LineWidth',3);
 hold on;
 plot(Nstep,estimate,':','LineWidth',3);
 plot(Nstep,Lestimate,':','LineWidth',3);
-xlabel('Ñİ»¯²½Êı','FontSize',15)
-ylabel('·Ö×ÓÊıÁ¿','FontSize',15)
+xlabel('æ¼”åŒ–æ­¥æ•°','FontSize',15)
+ylabel('åˆ†å­æ•°é‡','FontSize',15)
 set(gca,'FontSize',15)
-legend('ÓÒ²à·Ö×Ó¼ÆËã½á¹û','×ó²à·Ö×Ó¼ÆËã½á¹û','ÓÒ²à·Ö×ÓÆÚÍûÖµ','×ó²à·Ö×ÓÆÚÍûÖµ')
+legend('å³ä¾§åˆ†å­è®¡ç®—ç»“æœ','å·¦ä¾§åˆ†å­è®¡ç®—ç»“æœ','å³ä¾§åˆ†å­æœŸæœ›å€¼','å·¦ä¾§åˆ†å­æœŸæœ›å€¼')
 hold off;
