@@ -34,5 +34,5 @@ xlabel('x','FontSize',18)
 ylabel('y','FontSize',18)
 zlabel('z','FontSize',18)
 set(gca,'FontSize',18)
-legend('分子运动轨迹','力心')
+legend('鍒嗗瓙杩愬姩杞ㄨ抗','鍔涘績')
 hold off
