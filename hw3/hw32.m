@@ -17,13 +17,13 @@ for i=1:1:steps
     v(1,evolutionparticle2)=vo2;
 end
 hist(v,15);
-xlabel('·Ö×ÓËÙÂÊ(m/s)','FontSize',15)
-ylabel('·Ö×ÓÊıÁ¿','FontSize',15)
+xlabel('åˆ†å­é€Ÿç‡(m/s)','FontSize',15)
+ylabel('åˆ†å­æ•°é‡','FontSize',15)
 set(gca,'FontSize',15)
 hold on;
 v=1:1:150;
 alpha=1112.7783333333;
 f=10.*N.*4.*pi.*v.^2.*(1/(2*pi*alpha)).^(3/2).*exp(-(v.*v)/(2.*alpha));
 plot(v,f,'r','LineWidth',2);
-legend('³ÌĞò¼ÆËã½á¹û','Maxwell·Ö²¼ÂÊ');
+legend('ç¨‹åºè®¡ç®—ç»“æœ','Maxwellåˆ†å¸ƒç‡');
 hold off;
